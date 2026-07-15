@@ -1,253 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>RPG Test</title>
-
-<style>
-*{
-    box-sizing:border-box;
-}
-
-body{
-    margin:0;
-    background:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    overflow:hidden;
-    font-family:Arial,sans-serif;
-}
-
-#game{
-    width:800px;
-    height:600px;
-    background:black;
-    overflow:hidden;
-    position:relative;
-    border:3px solid black;
-}
-
-#world{
-    position:absolute;
-    width:1600px;
-    height:1200px;
-}
-
-.character{
-    position:absolute;
-    width:64px;
-    height:64px;
-    image-rendering:pixelated;
-    user-select:none;
-    pointer-events:none;
-}
-
-#player{
-    left:800px;
-    top:600px;
-}
-
-#npc{
-    left:120px;
-    top:120px;
-}
-
-#prompt{
-    position:absolute;
-    color:white;
-    font-size:28px;
-    font-weight:bold;
-    display:none;
-    pointer-events:none;
-    text-shadow:0 0 5px black;
-}
-
-#dialogue{
-    position:absolute;
-    left:0;
-    bottom:0;
-    width:100%;
-    height:170px;
-    background:white;
-    border-top:5px solid black;
-    display:none;
-    padding:20px;
-}
-
-#speaker{
-    font-weight:bold;
-    font-size:24px;
-}
-
-#text{
-    margin-top:15px;
-    font-size:22px;
-}
-
-#exit{
-    position:absolute;
-    right:20px;
-    bottom:20px;
-    color:#444;
-}
-</style>
+    <meta charset="UTF-8">
+    <title>Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div id="game">
 
     <div id="world">
 
-        <img id="npc" class="character" src="guy2.png">
+        <img id="npc" src="guy2.png">
 
         <div id="prompt">E</div>
 
-        <img id="player" class="character" src="guy.png">
+        <img id="player" src="guy.png">
 
     </div>
 
     <div id="dialogue">
         <div id="speaker">guy2:</div>
         <div id="text">blank</div>
+
         <div id="exit">Exit: E</div>
     </div>
 
 </div>
 
-<script>
-
-const game=document.getElementById("game");
-const world=document.getElementById("world");
-const player=document.getElementById("player");
-const npc=document.getElementById("npc");
-const prompt=document.getElementById("prompt");
-const dialogue=document.getElementById("dialogue");
-
-const PLAYER_SIZE=64;
-const NPC_SIZE=64;
-
-let playerX=800;
-let playerY=600;
-
-const npcX=120;
-const npcY=120;
-
-const SPEED=4;
-
-const keys={};
-
-let talking=false;
-let nearNPC=false;
-
-document.addEventListener("keydown",(e)=>{
-
-    const key=e.key.toLowerCase();
-
-    if(key==="e"){
-
-        if(nearNPC){
-
-            talking=!talking;
-
-            dialogue.style.display=talking?"block":"none";
-
-        }
-
-        return;
-    }
-
-    keys[key]=true;
-
-});
-
-document.addEventListener("keyup",(e)=>{
-
-    keys[e.key.toLowerCase()]=false;
-
-});
-
-function collide(ax,ay,bx,by){
-
-    return (
-        ax < bx+NPC_SIZE &&
-        ax+PLAYER_SIZE > bx &&
-        ay < by+NPC_SIZE &&
-        ay+PLAYER_SIZE > by
-    );
-
-}
-
-function update(){
-
-    if(!talking){
-
-        let nx=playerX;
-        let ny=playerY;
-
-        if(keys["w"]) ny-=SPEED;
-        if(keys["s"]) ny+=SPEED;
-        if(keys["a"]) nx-=SPEED;
-        if(keys["d"]) nx+=SPEED;
-
-        nx=Math.max(0,Math.min(1600-PLAYER_SIZE,nx));
-        ny=Math.max(0,Math.min(1200-PLAYER_SIZE,ny));
-
-        if(!collide(nx,ny,npcX,npcY)){
-
-            playerX=nx;
-            playerY=ny;
-
-        }
-
-    }
-
-    player.style.left=playerX+"px";
-    player.style.top=playerY+"px";
-
-    npc.style.left=npcX+"px";
-    npc.style.top=npcY+"px";
-
-    const dx=(playerX+32)-(npcX+32);
-    const dy=(playerY+32)-(npcY+32);
-
-    const distance=Math.sqrt(dx*dx+dy*dy);
-
-    nearNPC=distance<120;
-
-    if(nearNPC && !talking){
-
-        prompt.style.display="block";
-        prompt.style.left=(npcX+22)+"px";
-        prompt.style.top=(npcY-30)+"px";
-
-    }else{
-
-        prompt.style.display="none";
-
-    }
-
-    let camX=playerX-400+32;
-    let camY=playerY-300+32;
-
-    camX=Math.max(0,Math.min(800,camX));
-    camY=Math.max(0,Math.min(600,camY));
-
-    world.style.transform=`translate(${-camX}px,${-camY}px)`;
-
-    requestAnimationFrame(update);
-
-}
-
-player.onload=()=>{
-
-    update();
-
-};
-
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
