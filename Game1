@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Little Room</title>
+
+<style>
+body {
+    margin: 0;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+#room {
+    width: 800px;
+    height: 600px;
+    background: black;
+    position: relative;
+    overflow: hidden;
+}
+
+.character {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+}
+
+#player {
+    left: 350px;
+    top: 250px;
+}
+
+#npc {
+    left: 20px;
+    top: 20px;
+}
+</style>
+</head>
+<body>
+
+<div id="room">
+    <img src="guy2.png" id="npc" class="character">
+    <img src="guy.png" id="player" class="character">
+</div>
+
+<script>
+const player = document.getElementById("player");
+const npc = document.getElementById("npc");
+const room = document.getElementById("room");
+
+let x = 350;
+let y = 250;
+
+const speed = 3;
+
+const keys = {};
+
+document.addEventListener("keydown", e => {
+    keys[e.key.toLowerCase()] = true;
+});
+
+document.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+function intersects(ax, ay, aw, ah, bx, by, bw, bh) {
+    return (
+        ax < bx + bw &&
+        ax + aw > bx &&
+        ay < by + bh &&
+        ay + ah > by
+    );
+}
+
+function update() {
+
+    let newX = x;
+    let newY = y;
+
+    if (keys["w"]) newY -= speed;
+    if (keys["s"]) newY += speed;
+    if (keys["a"]) newX -= speed;
+    if (keys["d"]) newX += speed;
+
+    // Room boundaries
+    newX = Math.max(0, Math.min(room.clientWidth - player.width, newX));
+    newY = Math.max(0, Math.min(room.clientHeight - player.height, newY));
+
+    // NPC collision
+    const npcX = npc.offsetLeft;
+    const npcY = npc.offsetTop;
+
+    if (!intersects(
+        newX,
+        newY,
+        player.width,
+        player.height,
+        npcX,
+        npcY,
+        npc.width,
+        npc.height
+    )) {
+        x = newX;
+        y = newY;
+    }
+
+    player.style.left = x + "px";
+    player.style.top = y + "px";
+
+    requestAnimationFrame(update);
+}
+
+update();
+</script>
+
+</body>
+</html>
