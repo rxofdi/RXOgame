@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Little Room</title>
+<title>RPG Test</title>
 
 <style>
+*{
+    box-sizing:border-box;
+}
+
 body{
     margin:0;
     background:white;
@@ -13,23 +17,22 @@ body{
     align-items:center;
     height:100vh;
     overflow:hidden;
-    font-family:Arial;
+    font-family:Arial,sans-serif;
 }
 
 #game{
     width:800px;
     height:600px;
+    background:black;
     overflow:hidden;
     position:relative;
-    background:black;
+    border:3px solid black;
 }
 
 #world{
+    position:absolute;
     width:1600px;
     height:1200px;
-    position:absolute;
-    left:0;
-    top:0;
 }
 
 .character{
@@ -37,6 +40,8 @@ body{
     width:64px;
     height:64px;
     image-rendering:pixelated;
+    user-select:none;
+    pointer-events:none;
 }
 
 #player{
@@ -45,16 +50,16 @@ body{
 }
 
 #npc{
-    left:100px;
-    top:100px;
+    left:120px;
+    top:120px;
 }
 
-#interactPrompt{
+#prompt{
     position:absolute;
-    display:none;
     color:white;
     font-size:28px;
     font-weight:bold;
+    display:none;
     pointer-events:none;
     text-shadow:0 0 5px black;
 }
@@ -66,9 +71,8 @@ body{
     width:100%;
     height:170px;
     background:white;
-    border-top:6px solid black;
+    border-top:5px solid black;
     display:none;
-    box-sizing:border-box;
     padding:20px;
 }
 
@@ -82,144 +86,166 @@ body{
     font-size:22px;
 }
 
-#exitHint{
+#exit{
     position:absolute;
     right:20px;
     bottom:20px;
-    font-size:18px;
+    color:#444;
 }
 </style>
 </head>
+
 <body>
 
 <div id="game">
+
     <div id="world">
 
-        <img src="guy2.png" id="npc" class="character">
+        <img id="npc" class="character" src="guy2.png">
 
-        <div id="interactPrompt">E</div>
+        <div id="prompt">E</div>
 
-        <img src="guy.png" id="player" class="character">
+        <img id="player" class="character" src="guy.png">
 
     </div>
 
     <div id="dialogue">
         <div id="speaker">guy2:</div>
-        <div id="text">hey man it's me. do you know what this is? what are we?</div>
-
-        <div id="exitHint">Exit: E</div>
+        <div id="text">blank</div>
+        <div id="exit">Exit: E</div>
     </div>
 
 </div>
 
 <script>
-const game = document.getElementById("game");
-const world = document.getElementById("world");
-const player = document.getElementById("player");
-const npc = document.getElementById("npc");
-const dialogue = document.getElementById("dialogue");
-const prompt = document.getElementById("interactPrompt");
 
-let x = 800;
-let y = 600;
+const game=document.getElementById("game");
+const world=document.getElementById("world");
+const player=document.getElementById("player");
+const npc=document.getElementById("npc");
+const prompt=document.getElementById("prompt");
+const dialogue=document.getElementById("dialogue");
 
-const speed = 4;
+const PLAYER_SIZE=64;
+const NPC_SIZE=64;
 
-const keys = {};
-let talking = false;
-let canInteract = false;
+let playerX=800;
+let playerY=600;
 
-document.addEventListener("keydown", e => {
+const npcX=120;
+const npcY=120;
 
-    const key = e.key.toLowerCase();
+const SPEED=4;
 
-    if(key === "e" && canInteract){
+const keys={};
 
-        if(!talking){
-            talking = true;
-            dialogue.style.display = "block";
-        }else{
-            talking = false;
-            dialogue.style.display = "none";
+let talking=false;
+let nearNPC=false;
+
+document.addEventListener("keydown",(e)=>{
+
+    const key=e.key.toLowerCase();
+
+    if(key==="e"){
+
+        if(nearNPC){
+
+            talking=!talking;
+
+            dialogue.style.display=talking?"block":"none";
+
         }
 
         return;
     }
 
-    keys[key] = true;
+    keys[key]=true;
+
 });
 
-document.addEventListener("keyup", e=>{
-    keys[e.key.toLowerCase()] = false;
+document.addEventListener("keyup",(e)=>{
+
+    keys[e.key.toLowerCase()]=false;
+
 });
 
-function intersects(ax, ay, aw, ah, bx, by, bw, bh){
+function collide(ax,ay,bx,by){
+
     return (
-        ax < bx+bw &&
-        ax+aw > bx &&
-        ay < by+bh &&
-        ay+ah > by
+        ax < bx+NPC_SIZE &&
+        ax+PLAYER_SIZE > bx &&
+        ay < by+NPC_SIZE &&
+        ay+PLAYER_SIZE > by
     );
+
 }
 
 function update(){
 
     if(!talking){
 
-        let nx = x;
-        let ny = y;
+        let nx=playerX;
+        let ny=playerY;
 
-        if(keys["w"]) ny -= speed;
-        if(keys["s"]) ny += speed;
-        if(keys["a"]) nx -= speed;
-        if(keys["d"]) nx += speed;
+        if(keys["w"]) ny-=SPEED;
+        if(keys["s"]) ny+=SPEED;
+        if(keys["a"]) nx-=SPEED;
+        if(keys["d"]) nx+=SPEED;
 
-        nx = Math.max(0, Math.min(1600-player.width, nx));
-        ny = Math.max(0, Math.min(1200-player.height, ny));
+        nx=Math.max(0,Math.min(1600-PLAYER_SIZE,nx));
+        ny=Math.max(0,Math.min(1200-PLAYER_SIZE,ny));
 
-        if(!intersects(
-            nx, ny,
-            player.width, player.height,
-            npc.offsetLeft, npc.offsetTop,
-            npc.width, npc.height
-        )){
-            x = nx;
-            y = ny;
+        if(!collide(nx,ny,npcX,npcY)){
+
+            playerX=nx;
+            playerY=ny;
+
         }
+
     }
 
-    player.style.left = x+"px";
-    player.style.top = y+"px";
+    player.style.left=playerX+"px";
+    player.style.top=playerY+"px";
 
-    // Camera
-    let camX = x - game.clientWidth/2 + player.width/2;
-    let camY = y - game.clientHeight/2 + player.height/2;
+    npc.style.left=npcX+"px";
+    npc.style.top=npcY+"px";
 
-    camX = Math.max(0, Math.min(1600-game.clientWidth, camX));
-    camY = Math.max(0, Math.min(1200-game.clientHeight, camY));
+    const dx=(playerX+32)-(npcX+32);
+    const dy=(playerY+32)-(npcY+32);
 
-    world.style.transform = `translate(${-camX}px, ${-camY}px)`;
+    const distance=Math.sqrt(dx*dx+dy*dy);
 
-    // Interaction distance
-    const dx = x - npc.offsetLeft;
-    const dy = y - npc.offsetTop;
-    const dist = Math.sqrt(dx*dx+dy*dy);
+    nearNPC=distance<120;
 
-    if(dist < 120){
-        canInteract = true;
-        prompt.style.display = "block";
-        prompt.style.left = npc.offsetLeft + 20 + "px";
-        prompt.style.top = npc.offsetTop - 30 + "px";
+    if(nearNPC && !talking){
+
+        prompt.style.display="block";
+        prompt.style.left=(npcX+22)+"px";
+        prompt.style.top=(npcY-30)+"px";
+
     }else{
-        canInteract = false;
-        if(!talking)
-            prompt.style.display = "none";
+
+        prompt.style.display="none";
+
     }
+
+    let camX=playerX-400+32;
+    let camY=playerY-300+32;
+
+    camX=Math.max(0,Math.min(800,camX));
+    camY=Math.max(0,Math.min(600,camY));
+
+    world.style.transform=`translate(${-camX}px,${-camY}px)`;
 
     requestAnimationFrame(update);
+
 }
 
-update();
+player.onload=()=>{
+
+    update();
+
+};
 
 </script>
 
