@@ -5,118 +5,222 @@
 <title>Little Room</title>
 
 <style>
-body {
-    margin: 0;
-    background: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-    font-family: sans-serif;
+body{
+    margin:0;
+    background:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    overflow:hidden;
+    font-family:Arial;
 }
 
-#room {
-    width: 800px;
-    height: 600px;
-    background: black;
-    position: relative;
-    overflow: hidden;
+#game{
+    width:800px;
+    height:600px;
+    overflow:hidden;
+    position:relative;
+    background:black;
 }
 
-.character {
-    position: absolute;
-    width: 64px;
-    height: 64px;
-    image-rendering: pixelated;
+#world{
+    width:1600px;
+    height:1200px;
+    position:absolute;
+    left:0;
+    top:0;
 }
 
-#player {
-    left: 350px;
-    top: 250px;
+.character{
+    position:absolute;
+    width:64px;
+    height:64px;
+    image-rendering:pixelated;
 }
 
-#npc {
-    left: 20px;
-    top: 20px;
+#player{
+    left:800px;
+    top:600px;
+}
+
+#npc{
+    left:100px;
+    top:100px;
+}
+
+#interactPrompt{
+    position:absolute;
+    display:none;
+    color:white;
+    font-size:28px;
+    font-weight:bold;
+    pointer-events:none;
+    text-shadow:0 0 5px black;
+}
+
+#dialogue{
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:170px;
+    background:white;
+    border-top:6px solid black;
+    display:none;
+    box-sizing:border-box;
+    padding:20px;
+}
+
+#speaker{
+    font-weight:bold;
+    font-size:24px;
+}
+
+#text{
+    margin-top:15px;
+    font-size:22px;
+}
+
+#exitHint{
+    position:absolute;
+    right:20px;
+    bottom:20px;
+    font-size:18px;
 }
 </style>
 </head>
 <body>
 
-<div id="room">
-    <img src="guy2.png" id="npc" class="character">
-    <img src="guy.png" id="player" class="character">
+<div id="game">
+    <div id="world">
+
+        <img src="guy2.png" id="npc" class="character">
+
+        <div id="interactPrompt">E</div>
+
+        <img src="guy.png" id="player" class="character">
+
+    </div>
+
+    <div id="dialogue">
+        <div id="speaker">guy2:</div>
+        <div id="text">hey man it's me. do you know what this is? what are we?</div>
+
+        <div id="exitHint">Exit: E</div>
+    </div>
+
 </div>
 
 <script>
+const game = document.getElementById("game");
+const world = document.getElementById("world");
 const player = document.getElementById("player");
 const npc = document.getElementById("npc");
-const room = document.getElementById("room");
+const dialogue = document.getElementById("dialogue");
+const prompt = document.getElementById("interactPrompt");
 
-let x = 350;
-let y = 250;
+let x = 800;
+let y = 600;
 
-const speed = 3;
+const speed = 4;
 
 const keys = {};
+let talking = false;
+let canInteract = false;
 
 document.addEventListener("keydown", e => {
-    keys[e.key.toLowerCase()] = true;
+
+    const key = e.key.toLowerCase();
+
+    if(key === "e" && canInteract){
+
+        if(!talking){
+            talking = true;
+            dialogue.style.display = "block";
+        }else{
+            talking = false;
+            dialogue.style.display = "none";
+        }
+
+        return;
+    }
+
+    keys[key] = true;
 });
 
-document.addEventListener("keyup", e => {
+document.addEventListener("keyup", e=>{
     keys[e.key.toLowerCase()] = false;
 });
 
-function intersects(ax, ay, aw, ah, bx, by, bw, bh) {
+function intersects(ax, ay, aw, ah, bx, by, bw, bh){
     return (
-        ax < bx + bw &&
-        ax + aw > bx &&
-        ay < by + bh &&
-        ay + ah > by
+        ax < bx+bw &&
+        ax+aw > bx &&
+        ay < by+bh &&
+        ay+ah > by
     );
 }
 
-function update() {
+function update(){
 
-    let newX = x;
-    let newY = y;
+    if(!talking){
 
-    if (keys["w"]) newY -= speed;
-    if (keys["s"]) newY += speed;
-    if (keys["a"]) newX -= speed;
-    if (keys["d"]) newX += speed;
+        let nx = x;
+        let ny = y;
 
-    // Room boundaries
-    newX = Math.max(0, Math.min(room.clientWidth - player.width, newX));
-    newY = Math.max(0, Math.min(room.clientHeight - player.height, newY));
+        if(keys["w"]) ny -= speed;
+        if(keys["s"]) ny += speed;
+        if(keys["a"]) nx -= speed;
+        if(keys["d"]) nx += speed;
 
-    // NPC collision
-    const npcX = npc.offsetLeft;
-    const npcY = npc.offsetTop;
+        nx = Math.max(0, Math.min(1600-player.width, nx));
+        ny = Math.max(0, Math.min(1200-player.height, ny));
 
-    if (!intersects(
-        newX,
-        newY,
-        player.width,
-        player.height,
-        npcX,
-        npcY,
-        npc.width,
-        npc.height
-    )) {
-        x = newX;
-        y = newY;
+        if(!intersects(
+            nx, ny,
+            player.width, player.height,
+            npc.offsetLeft, npc.offsetTop,
+            npc.width, npc.height
+        )){
+            x = nx;
+            y = ny;
+        }
     }
 
-    player.style.left = x + "px";
-    player.style.top = y + "px";
+    player.style.left = x+"px";
+    player.style.top = y+"px";
+
+    // Camera
+    let camX = x - game.clientWidth/2 + player.width/2;
+    let camY = y - game.clientHeight/2 + player.height/2;
+
+    camX = Math.max(0, Math.min(1600-game.clientWidth, camX));
+    camY = Math.max(0, Math.min(1200-game.clientHeight, camY));
+
+    world.style.transform = `translate(${-camX}px, ${-camY}px)`;
+
+    // Interaction distance
+    const dx = x - npc.offsetLeft;
+    const dy = y - npc.offsetTop;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+
+    if(dist < 120){
+        canInteract = true;
+        prompt.style.display = "block";
+        prompt.style.left = npc.offsetLeft + 20 + "px";
+        prompt.style.top = npc.offsetTop - 30 + "px";
+    }else{
+        canInteract = false;
+        if(!talking)
+            prompt.style.display = "none";
+    }
 
     requestAnimationFrame(update);
 }
 
 update();
+
 </script>
 
 </body>
