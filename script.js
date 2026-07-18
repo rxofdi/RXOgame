@@ -34,7 +34,7 @@ controls.addEventListener("unlock", ()=>{
 
 // Camera
 
-camera.position.set(0,2,0);
+camera.position.set(0, -48, 0);
 
 // Lighting
 
@@ -116,7 +116,7 @@ controls.moveForward(-velocity.z * speed);
 
     camera.position.x = THREE.MathUtils.clamp(camera.position.x,-48,48);
     camera.position.z = THREE.MathUtils.clamp(camera.position.z,-48,48);
-    camera.position.y = 2;
+    camera.position.y = -48;
 }
 
 function animate(){
