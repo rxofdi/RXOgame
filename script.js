@@ -47,7 +47,7 @@ const size = 100;
 // Skybox texture
 
 const loader = new THREE.TextureLoader();
-const tex = loader.load("forest.jpeg");
+const tex = loader.load("forest.jpg");
 
 // Create cube
 
