@@ -107,7 +107,7 @@ function updateMovement(){
 
     velocity.normalize();
 
-const speed = 0.35;
+const speed = 0.25;
 
 controls.moveRight(velocity.x * speed);
 controls.moveForward(-velocity.z * speed);
