@@ -3,6 +3,9 @@ import { PointerLockControls } from "three/addons/controls/PointerLockControls.j
 
 const scene = new THREE.Scene();
 
+scene.fog = new THREE.Fog(0xffffff, 50, 600);
+renderer.setClearColor(0xffffff);
+
 const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth/window.innerHeight,
@@ -34,7 +37,7 @@ controls.addEventListener("unlock", ()=>{
 
 // Camera
 
-camera.position.set(0, -48, 0);
+camera.position.set(-1490, -1498, 0);
 
 // Lighting
 
@@ -42,7 +45,7 @@ scene.add(new THREE.AmbientLight(0xffffff,1));
 
 // Cube size
 
-const size = 100;
+const size = 3000;
 
 // Skybox texture
 
@@ -114,8 +117,8 @@ controls.moveForward(-velocity.z * speed);
 
     // Clamp player inside cube
 
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x,-48,48);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z,-48,48);
+camera.position.x = THREE.MathUtils.clamp(camera.position.x, -1498, 1498);
+camera.position.z = THREE.MathUtils.clamp(camera.position.z, -1498, 1498);
     camera.position.y = -48;
 }
 
