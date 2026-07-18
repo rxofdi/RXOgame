@@ -1,130 +1,131 @@
-const game = document.getElementById("game");
-const world = document.getElementById("world");
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js";
+import { PointerLockControls } from "https://cdn.jsdelivr.net/npm/three@0.170/examples/jsm/controls/PointerLockControls.js";
 
-const player = document.getElementById("player");
-const npc = document.getElementById("npc");
+const scene = new THREE.Scene();
 
-const prompt = document.getElementById("prompt");
-const dialogue = document.getElementById("dialogue");
+const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth/window.innerHeight,
+    0.1,
+    1000
+);
 
-const WORLD_WIDTH = 1600;
-const WORLD_HEIGHT = 1200;
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-const PLAYER = 64;
-const NPC = 64;
+// Controls
 
-let px = 800;
-let py = 600;
+const controls = new PointerLockControls(camera, document.body);
 
-const nx = 120;
-const ny = 120;
+const start = document.getElementById("startScreen");
 
-const speed = 4;
+start.addEventListener("click", ()=>{
+    controls.lock();
+});
 
-let talking = false;
-let near = false;
+controls.addEventListener("lock", ()=>{
+    start.style.display="none";
+});
+
+controls.addEventListener("unlock", ()=>{
+    start.style.display="flex";
+});
+
+// Camera
+
+camera.position.set(0,2,0);
+
+// Lighting
+
+scene.add(new THREE.AmbientLight(0xffffff,1));
+
+// Cube size
+
+const size = 100;
+
+// Skybox texture
+
+const loader = new THREE.TextureLoader();
+const tex = loader.load("forest.jpeg");
+
+// Create cube
+
+const wallMaterial = new THREE.MeshBasicMaterial({
+    map: tex,
+    side: THREE.BackSide
+});
+
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(size,size,size),
+    wallMaterial
+);
+
+scene.add(cube);
+
+// Ground
+
+const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(size,size),
+    new THREE.MeshBasicMaterial({color:0x000000})
+);
+
+ground.rotation.x = -Math.PI/2;
+ground.position.y = -size/2 + 0.01;
+
+scene.add(ground);
+
+// Movement
 
 const keys = {};
 
 document.addEventListener("keydown",(e)=>{
-
-    const k=e.key.toLowerCase();
-
-    if(k==="e"){
-
-        if(near){
-
-            talking=!talking;
-
-            dialogue.style.display=talking?"block":"none";
-
-        }
-
-        return;
-
-    }
-
-    keys[k]=true;
-
+    keys[e.key.toLowerCase()] = true;
 });
 
 document.addEventListener("keyup",(e)=>{
-
-    keys[e.key.toLowerCase()]=false;
-
+    keys[e.key.toLowerCase()] = false;
 });
 
-function collision(ax,ay,bx,by){
+const velocity = new THREE.Vector3();
 
-    return (
+function updateMovement(){
 
-        ax < bx+NPC &&
-        ax+PLAYER > bx &&
-        ay < by+NPC &&
-        ay+PLAYER > by
+    velocity.set(0,0,0);
 
-    );
+    if(keys["w"]) velocity.z -= 1;
+    if(keys["s"]) velocity.z += 1;
+    if(keys["a"]) velocity.x -= 1;
+    if(keys["d"]) velocity.x += 1;
 
+    velocity.normalize();
+
+    controls.moveRight(velocity.x * 0.2);
+    controls.moveForward(-velocity.z * 0.2);
+
+    // Clamp player inside cube
+
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x,-48,48);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z,-48,48);
+    camera.position.y = 2;
 }
 
-function gameLoop(){
+function animate(){
 
-    if(!talking){
+    requestAnimationFrame(animate);
 
-        let x=px;
-        let y=py;
+    updateMovement();
 
-        if(keys["w"]) y-=speed;
-        if(keys["s"]) y+=speed;
-        if(keys["a"]) x-=speed;
-        if(keys["d"]) x+=speed;
-
-        x=Math.max(0,Math.min(WORLD_WIDTH-PLAYER,x));
-        y=Math.max(0,Math.min(WORLD_HEIGHT-PLAYER,y));
-
-        if(!collision(x,y,nx,ny)){
-
-            px=x;
-            py=y;
-
-        }
-
-    }
-
-    player.style.left=px+"px";
-    player.style.top=py+"px";
-
-    npc.style.left=nx+"px";
-    npc.style.top=ny+"px";
-
-    const dx=(px+32)-(nx+32);
-    const dy=(py+32)-(ny+32);
-
-    near=Math.sqrt(dx*dx+dy*dy)<120;
-
-    if(near&&!talking){
-
-        prompt.style.display="block";
-
-        prompt.style.left=(nx+20)+"px";
-        prompt.style.top=(ny-25)+"px";
-
-    }else{
-
-        prompt.style.display="none";
-
-    }
-
-    let camX=px-400+32;
-    let camY=py-300+32;
-
-    camX=Math.max(0,Math.min(WORLD_WIDTH-800,camX));
-    camY=Math.max(0,Math.min(WORLD_HEIGHT-600,camY));
-
-    world.style.transform=`translate(${-camX}px,${-camY}px)`;
-
-    requestAnimationFrame(gameLoop);
-
+    renderer.render(scene,camera);
 }
 
-gameLoop();
+animate();
+
+window.addEventListener("resize",()=>{
+
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth,window.innerHeight);
+
+});
