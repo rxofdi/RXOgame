@@ -65,13 +65,20 @@ scene.add(cube);
 
 // Ground
 
+const groundTexture = loader.load("dirt.jpg");
+groundTexture.wrapS = THREE.RepeatWrapping;
+groundTexture.wrapT = THREE.RepeatWrapping;
+groundTexture.repeat.set(25, 25);
+
 const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(size,size),
-    new THREE.MeshBasicMaterial({color:0x000000})
+    new THREE.PlaneGeometry(size, size),
+    new THREE.MeshBasicMaterial({
+        map: groundTexture
+    })
 );
 
-ground.rotation.x = -Math.PI/2;
-ground.position.y = -size/2 + 0.01;
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -size / 2 + 0.01;
 
 scene.add(ground);
 
@@ -100,8 +107,10 @@ function updateMovement(){
 
     velocity.normalize();
 
-    controls.moveRight(velocity.x * 0.2);
-    controls.moveForward(-velocity.z * 0.2);
+const speed = 0.6;
+
+controls.moveRight(velocity.x * speed);
+controls.moveForward(-velocity.z * speed);
 
     // Clamp player inside cube
 
