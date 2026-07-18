@@ -1,5 +1,5 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.170/build/three.module.js";
-import { PointerLockControls } from "https://cdn.jsdelivr.net/npm/three@0.170/examples/jsm/controls/PointerLockControls.js";
+import * as THREE from "three";
+import { PointerLockControls } from "three/addons/controls/PointerLockControls.js";
 
 const scene = new THREE.Scene();
 
