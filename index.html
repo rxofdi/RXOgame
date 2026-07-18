@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>rxogame</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>3D Cube</title>
+<link rel="stylesheet" href="style.css">
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
 </head>
 <body>
-    <div id="startScreen">
-        <h1>click</h1>
-        <p>WASD to move<br>Mouse to look</p>
-    </div>
 
-    <script type="module" src="script.js"></script>
+<div id="startScreen">
+    <h1>Click to Start</h1>
+    <p>WASD • Mouse Look</p>
+</div>
+
+<script type="module" src="script.js"></script>
+
 </body>
 </html>
